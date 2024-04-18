@@ -11,15 +11,29 @@ mongoose.connect('mongodb://127.0.0.1:27017/testDB')
 .catch((err)=> console.log(err))
 
 const userSchema = new mongoose.Schema({
-  name: String,
-  email: String,
-  role: String
+  name: {
+    type: String,
+    required: true
+  },
+  email: {
+    type: String,
+    required: true
+  },
+  role: {
+    type: String,
+    required: true
+  }
 }, {timestamps: true});
 
 const userModel = mongoose.model('User', userSchema)
 
 app.get('/', (req, res) => {
   res.send('Home Page');
+})
+
+app.get('/users', async (req, res) => {
+  const users = await userModel.find({});
+  res.status(200).json({users});
 })
 
 app.post('/signup', async (req, res) => {
@@ -34,11 +48,14 @@ app.post('/signup', async (req, res) => {
     return res.status(400).json({msg : 'All fields are required'})
   }
 
-  const result = await userModel.insertMany({ name: body.name, email: body.email , role: body.role})
+  const result = await userModel.insertMany({ 
+    name: body.name, 
+    email: body.email, 
+    role: body.role
+  })
 
   res.status(201).json({msg: 'User created successfully', data: result})
 })
-
 app.listen(port,()=>{
   console.log(`listening on port ${port}`);
 })
